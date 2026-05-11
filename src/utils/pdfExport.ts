@@ -1,21 +1,30 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-export async function exportToPDF(elementId: string, filename: string = 'Statement_of_Work.pdf') {
+export async function exportToPDF(elementId: string, filename: string = 'Document_ScopeFlow.pdf') {
   const element = document.getElementById(elementId);
   if (!element) {
     console.error('Element not found');
     return;
   }
   
+  // Briefly add a print-friendly class if needed, but we'll rely on the element's existing styles
+  const originalStyle = element.style.cssText;
+  element.style.background = 'white';
+  element.style.padding = '40px'; // ensure padding isn't cut off
+  
   // Use html2canvas to capture the element as an image
   const canvas = await html2canvas(element, { 
     scale: 2, 
     useCORS: true,
-    logging: false
+    logging: false,
+    backgroundColor: '#ffffff'
   });
   
-  const imgData = canvas.toDataURL('image/png');
+  // Restore original styles
+  element.style.cssText = originalStyle;
+  
+  const imgData = canvas.toDataURL('image/jpeg', 0.98); // Use JPEG for smaller file size, high quality
   
   // Calculate A4 dimensions (210x297mm)
   const pdf = new jsPDF({
@@ -25,28 +34,26 @@ export async function exportToPDF(elementId: string, filename: string = 'Stateme
   });
   
   const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-  
-  // Create an explicit multi-page behavior if it's too long?
-  // MVP: just fit as one long page or standard single A4 scaled.
-  // We'll let it scale down to fit the height, or span into multiple pages.
-  // For simplicity and clean single-SOW generation, just add it.
-  
-  // If height > A4 height, we might want multipage, but a single long stream is okay for now.
-  // Actually standard SOW might just fit in one or two pages. Let's do simple continuous.
-  let heightLeft = pdfHeight;
-  let position = 0;
   const pageHeight = pdf.internal.pageSize.getHeight();
+  
+  // Calculate image height based on A4 width
+  const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+  
+  let heightLeft = imgHeight;
+  let position = 0;
 
-  pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+  // First page
+  pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
   heightLeft -= pageHeight;
 
-  while (heightLeft >= 0) {
-    position = heightLeft - pdfHeight;
+  // Add subsequent pages if the content overflows
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
     pdf.addPage();
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+    pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
     heightLeft -= pageHeight;
   }
   
   pdf.save(filename);
 }
+
