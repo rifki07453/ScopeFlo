@@ -6,7 +6,7 @@ import { FormSection } from '@/components/Form/FormSection';
 import { InputField } from '@/components/Form/InputField';
 import { TextAreaField } from '@/components/Form/TextAreaField';
 import { Button } from '@/components/UI/Button';
-import { ArrowLeft, Download, FileText, Settings, Lock, BookOpen, Save } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Settings, Lock, BookOpen, Save, UploadCloud, Loader2, FileCheck } from 'lucide-react';
 
 import { useDocumentGeneratorStore } from '@/store/useDocumentGeneratorStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -37,6 +37,40 @@ function GeneratorContent() {
   
   const [showClauseModal, setShowClauseModal] = React.useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = React.useState(false);
+
+  // Document Import / Conversion State
+  const [isImporting, setIsImporting] = React.useState(false);
+  const [importSuccess, setImportSuccess] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    setImportSuccess(false);
+
+    // Simulate AI parsing/extraction delay
+    setTimeout(() => {
+      setIsImporting(false);
+      setImportSuccess(true);
+      
+      // Simulate auto-populating fields based on the uploaded document
+      updateField('clientName', 'Imported Client Ltd.');
+      updateField('title', file.name.replace(/\.[^/.]+$/, "")); // use filename as title
+      updateField('summary', 'This summary was automatically extracted from the uploaded document using ScopeFlo AI.');
+      
+      if (docType === 'sow') {
+        updateField('scopeOfWork', '1. Initial phase setup\n2. Design mockups and review\n3. Final delivery (Extracted from document)');
+      }
+
+      // Reset success state after 3 seconds
+      setTimeout(() => setImportSuccess(false), 3000);
+      
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }, 2000);
+  };
 
   const handleSaveDraft = () => {
     saveProject(draft);
@@ -90,9 +124,11 @@ function GeneratorContent() {
       <div className="w-1/2 flex flex-col h-full overflow-y-auto border-r border-gray-200 bg-white shadow-xl z-20">
         <div className="px-8 py-6 border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-sm z-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => router.push('/dashboard')} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            {isLoggedIn && (
+              <button onClick={() => router.push('/dashboard')} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
             <div>
               <div className="text-xs font-bold text-purple-600 mb-1">{currentTypeObj.phase}</div>
               <select 
@@ -131,6 +167,53 @@ function GeneratorContent() {
         </div>
 
         <div className="p-8 flex-1 space-y-8">
+          
+          {/* IMPORT DOCUMENT DROPZONE (iLovePDF Style) */}
+          <div 
+            className="border-2 border-dashed border-[#5a32fa]/30 bg-[#5a32fa]/5 rounded-2xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all hover:bg-[#5a32fa]/10 cursor-pointer"
+            onClick={() => !isImporting && fileInputRef.current?.click()}
+          >
+            <input 
+              type="file" 
+              className="hidden" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              accept=".pdf,.doc,.docx"
+            />
+            
+            {isImporting ? (
+              <div className="flex flex-col items-center space-y-4 animate-pulse">
+                <Loader2 className="w-12 h-12 text-[#5a32fa] animate-spin" />
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Analyzing Document...</h3>
+                  <p className="text-sm text-gray-500">ScopeFlo AI is extracting your template data</p>
+                </div>
+              </div>
+            ) : importSuccess ? (
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <FileCheck className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-green-700">Migration Successful!</h3>
+                  <p className="text-sm text-green-600/80">Your form has been populated with the extracted data.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-16 h-16 bg-white shadow-sm rounded-full flex items-center justify-center mb-2">
+                  <UploadCloud className="w-8 h-8 text-[#5a32fa]" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 mb-1">Migrate from Word or PDF</h3>
+                  <p className="text-sm text-gray-500">Drop your existing document here to automatically extract and populate the ScopeFlo template.</p>
+                </div>
+                <Button className="mt-2 bg-[#5a32fa] hover:bg-[#4b27d4] shadow-md shadow-[#5a32fa]/20 pointer-events-none">
+                  Select File
+                </Button>
+              </div>
+            )}
+          </div>
           
           {/* SECTION: BRANDING & META */}
           <FormSection title="1. Branding & Meta" description="Logos and basic document identifiers.">

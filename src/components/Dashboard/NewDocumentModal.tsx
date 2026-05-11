@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useDocumentGeneratorStore } from '@/store/useDocumentGeneratorStore';
 
 interface Props {
   isOpen: boolean;
@@ -143,10 +144,13 @@ const PHASES = [
 
 export function NewDocumentModal({ isOpen, onClose }: Props) {
   const router = useRouter();
+  const { resetDraft, updateField } = useDocumentGeneratorStore();
 
   if (!isOpen) return null;
 
   const handleSelect = (type: string) => {
+    resetDraft();
+    updateField('docType', type);
     onClose();
     router.push(`/generator?type=${type}`);
   };

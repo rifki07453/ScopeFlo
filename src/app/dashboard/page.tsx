@@ -4,18 +4,31 @@ import React from 'react';
 import { SummaryCards } from '@/components/Dashboard/SummaryCards';
 import { DocumentTable } from '@/components/Dashboard/DocumentTable';
 import { ActivityLog } from '@/components/Dashboard/ActivityLog';
+import { NewDocumentModal } from '@/components/Dashboard/NewDocumentModal';
+import { Button } from '@/components/UI/Button';
+import { Plus } from 'lucide-react';
 import { useDashboardStore } from '@/store/useDashboardStore';
 
 export default function DashboardPage() {
   const { filterCategory, setFilterCategory } = useDashboardStore();
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const filterOptions = ['All', 'SOW', 'Quotation', 'Contract'];
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Welcome back!</h2>
-        <p className="text-gray-500 mt-1">Here's what's happening with your documents today.</p>
+      <div className="flex justify-between items-end">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Welcome back!</h2>
+          <p className="text-gray-500 mt-1">Here's what's happening with your documents today.</p>
+        </div>
+        <Button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-[#5a32fa] hover:bg-[#4b27d4] text-white shadow-md shadow-[#5a32fa]/20 flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          Create Document
+        </Button>
       </div>
 
       <SummaryCards />
@@ -46,6 +59,8 @@ export default function DashboardPage() {
           <ActivityLog />
         </div>
       </div>
+
+      <NewDocumentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

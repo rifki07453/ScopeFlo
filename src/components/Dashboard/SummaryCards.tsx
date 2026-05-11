@@ -1,19 +1,26 @@
 import React from 'react';
-import { useDashboardStore } from '@/store/useDashboardStore';
+import { useHistoryStore } from '@/store/useHistoryStore';
 
 export function SummaryCards() {
-  const { documents } = useDashboardStore();
+  const { projects } = useHistoryStore();
 
-  const activeDocsCount = documents.filter(doc => doc.status !== 'Draft' && doc.status !== 'Expired').length;
-  const totalValue = documents
-    .filter(doc => doc.status === 'Signed')
-    .reduce((sum, doc) => sum + doc.total_value, 0);
+  const activeDocsCount = projects.filter(doc => doc.status !== 'Draft' && doc.status !== 'Expired').length;
   
-  const totalSent = documents.filter(doc => ['Sent', 'Viewed', 'Signed'].includes(doc.status)).length;
-  const signedCount = documents.filter(doc => doc.status === 'Signed').length;
+  const totalValue = projects
+    .filter(doc => doc.status === 'Signed')
+    .reduce((sum, doc) => {
+      const docSubtotal = doc.items?.reduce((itemSum, item) => itemSum + (item.quantity * item.price), 0) || 0;
+      const discount = doc.discountAmount || 0;
+      const taxableAmount = Math.max(0, docSubtotal - discount);
+      const tax = taxableAmount * ((doc.taxRate || 0) / 100);
+      return sum + (taxableAmount + tax);
+    }, 0);
+  
+  const totalSent = projects.filter(doc => ['Sent', 'Viewed', 'Signed'].includes(doc.status)).length;
+  const signedCount = projects.filter(doc => doc.status === 'Signed').length;
   const signedPercentage = totalSent > 0 ? Math.round((signedCount / totalSent) * 100) : 0;
   
-  const pendingCount = documents.filter(doc => doc.status === 'Viewed').length;
+  const pendingCount = projects.filter(doc => doc.status === 'Viewed' || doc.status === 'Sent').length;
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
