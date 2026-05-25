@@ -1,7 +1,11 @@
+'use client';
 import React from 'react';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function Navbar() {
+  const { isLoggedIn, logout, user } = useAuthStore();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between max-w-7xl">
@@ -35,12 +39,31 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="hidden md:block text-sm font-bold text-gray-600 hover:text-purple-600 transition-colors">
-            Log in
-          </Link>
-          <Link href="/generator" className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-md shadow-purple-500/20 transition-all hover:-translate-y-0.5">
-            Start Free
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <span className="text-sm font-semibold text-gray-600 hidden sm:inline">
+                Hai, {user?.name}
+              </span>
+              <Link href="/dashboard" className="text-sm font-bold text-gray-600 hover:text-purple-600 transition-colors">
+                Dashboard
+              </Link>
+              <button 
+                onClick={logout}
+                className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors cursor-pointer"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="hidden md:block text-sm font-bold text-gray-600 hover:text-purple-600 transition-colors">
+                Log in
+              </Link>
+              <Link href="/register" className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-md shadow-purple-500/20 transition-all hover:-translate-y-0.5">
+                Start Free
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

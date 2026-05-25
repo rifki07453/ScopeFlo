@@ -8,9 +8,11 @@ import { NewDocumentModal } from '@/components/Dashboard/NewDocumentModal';
 import { Button } from '@/components/UI/Button';
 import { Plus } from 'lucide-react';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function DashboardPage() {
   const { filterCategory, setFilterCategory } = useDashboardStore();
+  const { user } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const filterOptions = ['All', 'SOW', 'Quotation', 'Contract'];
@@ -19,7 +21,7 @@ export default function DashboardPage() {
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Welcome back!</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Welcome back, {user?.name || 'User'}!</h2>
           <p className="text-gray-500 mt-1">Here's what's happening with your documents today.</p>
         </div>
         <Button 

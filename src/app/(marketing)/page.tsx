@@ -1,5 +1,8 @@
+"use client";
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/UI/Button';
 import {
   Star, MessageSquare, CheckSquare, Wand2,
@@ -13,6 +16,8 @@ import {
 import { PricingSection } from '@/components/Marketing/PricingSection';
 
 export default function LandingPage() {
+  const { isLoggedIn, logout, user } = useAuthStore();
+
   return (
     <div className="flex flex-col min-h-screen font-sans bg-[#0A0A0A]">
       {/* Floating Glass Header */}
@@ -28,12 +33,33 @@ export default function LandingPage() {
             <a href="#pricing" className="text-sm font-bold text-white/60 hover:text-white hover:scale-105 transition-all">Pricing</a>
           </nav>
           <div className="flex items-center gap-4 md:gap-6">
-            <a href="/login" className="text-sm font-bold text-white/80 hover:text-white transition-colors hidden sm:block">Log in</a>
-            <Link href="/generator">
-              <Button className="bg-white text-[#0A0A0A] hover:bg-orange-100 font-black rounded-lg md:rounded-xl px-5 md:px-7 h-10 md:h-12 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all">
-                Get Started
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <span className="text-sm font-semibold text-white/60 hidden sm:inline">
+                  Hai, {user?.name}
+                </span>
+                <Link href="/dashboard" className="text-sm font-bold text-white/80 hover:text-white transition-colors">
+                  Dashboard
+                </Link>
+                <button 
+                  onClick={logout}
+                  className="text-sm font-bold text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-bold text-white/80 hover:text-white transition-colors hidden sm:block">
+                  Log in
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-white text-[#0A0A0A] hover:bg-orange-100 font-black rounded-lg md:rounded-xl px-5 md:px-7 h-10 md:h-12 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>

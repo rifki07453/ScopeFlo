@@ -148,13 +148,19 @@ function GeneratorContent() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button 
-              onClick={toggleLogin}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${isLoggedIn ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-              title="Toggle Login State (Mock)"
-            >
-              {isLoggedIn ? 'Premium Mode' : 'Guest Mode'}
-            </button>
+            {isLoggedIn ? (
+              <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700 font-sans">
+                Premium Mode
+              </span>
+            ) : (
+              <button 
+                onClick={() => router.push('/login?callbackUrl=/generator')}
+                className="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors cursor-pointer font-sans"
+                title="Masuk untuk mengakses mode premium"
+              >
+                Guest Mode
+              </button>
+            )}
             <Button onClick={handleSaveDraft} variant="outline" className="border-[#5a32fa] text-[#5a32fa] hover:bg-[#5a32fa]/10">
               <Save className="w-4 h-4 mr-2" />
               Save Draft
@@ -455,21 +461,21 @@ function GeneratorContent() {
               <Lock className="w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Premium Feature</h2>
-            <p className="text-gray-500 mb-8">
-              This feature is only available for Logged In users. Toggle the "Guest Mode" button in the top bar to simulate being logged in.
+            <p className="text-gray-500 mb-8 text-sm leading-relaxed">
+              Fitur ini hanya tersedia untuk pengguna yang telah terdaftar dan masuk log. Silakan masuk untuk mengakses fitur ekspor premium, tanda tangan elektronik, dan perpustakaan klausul.
             </p>
             <div className="flex gap-4 w-full">
               <Button onClick={() => setShowUpgradeModal(false)} variant="outline" className="flex-1">
-                Close
+                Batal
               </Button>
               <Button 
                 onClick={() => {
-                  toggleLogin();
                   setShowUpgradeModal(false);
+                  router.push('/login?callbackUrl=/generator');
                 }} 
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
               >
-                Simulate Login
+                Masuk / Daftar
               </Button>
             </div>
           </div>

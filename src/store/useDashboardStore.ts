@@ -56,7 +56,7 @@ const mockActivities: ActivityLog[] = [
   {
     id: 'a3',
     document_id: '2',
-    action_type: 'SENT',
+    action_type: 'STATUS_CHANGED',
     description: 'Anda mengirim Quotation ke TechFlow Inc.',
     timestamp: '2026-04-25T09:15:00Z',
     metadata: { user: 'Admin' }
